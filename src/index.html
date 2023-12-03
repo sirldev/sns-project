@@ -1,12 +1,173 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
+<head>
+    <meta charset="UTF-8"/>
     <title>Hello World!</title>
-    <link rel="stylesheet" href="index.css" />
-  </head>
-  <body>
-    <h1>💖 Hello World!</h1>
-    <p>Welcome to your Electron application.</p>
-  </body>
+    <link rel="stylesheet" href="index.css"/>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" as="style" crossorigin
+          href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css"/>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"
+            integrity="sha384-mZLF4UVrpi/QTWPA7BjNPEnkIfRFn4ZEO3Qt/HFklTJBj/gBOV8G3HcKn4NfQblz"
+            crossorigin="anonymous"></script>
+</head>
+<body class="w-[800px] h-[600px]">
+<div class="flex w-[800px] h-[600px]">
+    <div class="w-[400px] h-[600px]">
+        <div class="w-full p-4">
+            <div class="text-xl font-bold text-sky-700">스마트네트워크서비스
+                <span class="text-xs font-semibold text-[#2A2A2A]">채팅프로그램</span>
+            </div>
+        </div>
+        <div class="px-4 mb-2">
+            <div class="text-[#2A2A2A] font-semibold mb-2">
+                채팅 관련 설정
+            </div>
+            <div class="flex gap-2">
+                <button id="nicknameBtn"
+                        class="bg-sky-500 hover:bg-sky-700 px-5 py-2 text-sm leading-5 rounded-full font-semibold text-white">
+                    닉네임 변경
+                </button>
+            </div>
+        </div>
+
+        <div class="px-4">
+            <div class="text-[#2A2A2A] font-semibold mb-2">
+                채팅 접속 관련 설정
+            </div>
+            <div class="flex gap-2">
+                <button id="connectIpBtn"
+                        class="bg-sky-500 hover:bg-sky-700 px-5 py-2 text-sm leading-5 rounded-full font-semibold text-white">
+                    접속 IP 설정
+                </button>
+                <button id="connectPortBtn"
+                        class="bg-sky-500 hover:bg-sky-700 px-5 py-2 text-sm leading-5 rounded-full font-semibold text-white">
+                    접속 포트 설정
+                </button>
+                <button id="connectBtn"
+                        class="bg-sky-500 hover:bg-sky-700 px-5 py-2 text-sm leading-5 rounded-full font-semibold text-white"
+                        onclick="connectBtn()">
+                    접속하기
+                </button>
+            </div>
+        </div>
+        <div class="px-4 mt-2">
+            <div class="text-[#2A2A2A] font-semibold mb-2">
+                서버 생성 관련 설정
+            </div>
+            <div class="flex gap-2">
+                <button id="portBtn"
+                        class="bg-sky-500 hover:bg-sky-700 px-5 py-2 text-sm leading-5 rounded-full font-semibold text-white">
+                    접속 포트 설정
+                </button>
+                <button id="serveBtn"
+                        class="bg-sky-500 hover:bg-sky-700 px-5 py-2 text-sm leading-5 rounded-full font-semibold text-white">
+                    서버 생성하기
+                </button>
+            </div>
+        </div>
+    </div>
+    <div class="flex flex-col w-[400px] h-[600px] border-l border-gray-300">
+        <div class="flex-1 flex flex-col overflow-y-scroll">
+            <div class="flex items-center justify-between w-full px-2 py-1 bg-[#2A2A2A]">
+                <div class="text-white" id="author">&nbsp;</div>
+                <div class="text-sky-700" id="port">&nbsp;</div>
+            </div>
+            <div class="flex-1" id="chat">
+
+            </div>
+        </div>
+        <div class="flex items-center justify-between w-[400px] py-2 bg-black px-2">
+            <input class="flex-1 px-2 mr-2" id="comment"/>
+            <button class="bg-sky-500 hover:bg-sky-700 px-3 py-1 text-xs rounded-lg font-semibold text-white"
+                    onclick="myOnClick()">
+                전송
+            </button>
+        </div>
+    </div>
+</div>
+</body>
+<script src="http://code.jquery.com/jquery-latest.js"></script>
+<script type="text/javascript">
+    // Include the ipc module to communicate with the main process.
+    const ipcRenderer = require('electron').ipcRenderer;
+
+    let socket
+
+    let author = "사용자"
+
+    const authorBtn = document.getElementById('nicknameBtn')
+
+    authorBtn.addEventListener('click', function () {
+        var arg = "secondparam";
+        ipcRenderer.send('authorBtnClick', arg)
+        ipcRenderer.send('author', arg)
+    })
+
+    const ipBtn = document.getElementById('connectIpBtn');
+
+    ipBtn.addEventListener('click', function () {
+        var arg = "secondparam";
+        // Send the info to the main process. We can pass any arguments as the second parameter.
+        ipcRenderer.send("ipBtnClick", arg); // ipcRenderer.send will pass the information to the main process
+    });
+
+    const serveBtn = document.getElementById('serveBtn');
+
+    serveBtn.addEventListener('click', function () {
+        console.log(1)
+        var arg = "secondparam";
+        // Send the info to the main process. We can pass any arguments as the second parameter.
+        ipcRenderer.send("serveBtnClick", arg); // ipcRenderer.send will pass the information to the main process
+        serveBtn.disabled = true
+    });
+
+    const connectPortBtn = document.getElementById('connectPortBtn');
+
+    connectPortBtn.addEventListener('click', function () {
+        var arg = "secondparam";
+        // Send the info to the main process. We can pass any arguments as the second parameter.
+        ipcRenderer.send("connectPortBtn", arg); // ipcRenderer.send will pass the information to the main process
+    });
+
+    const portBtn = document.getElementById('portBtn');
+
+    portBtn.addEventListener('click', function () {
+        var arg = "secondparam";
+        // Send the info to the main process. We can pass any arguments as the second parameter.
+        ipcRenderer.send("portBtn", arg); // ipcRenderer.send will pass the information to the main process
+    });
+
+    // receive message from main.js
+    ipcRenderer.on('author', (event, arg) => {
+        author = arg
+        $('#author').html(arg)
+    })
+
+    ipcRenderer.on('ip', (event, arg) => {
+        // author = arg
+        $('#port').html(arg)
+    })
+
+    function connectBtn() {
+        socket = io('http://127.0.0.1:4500')
+
+        ipcRenderer.send('connect', '')
+
+        $('#chat').html('')
+
+        socket.on('recMsg', function (data) {
+            console.log(data.comment)
+            $('#chat').append(`<div><span class="text-sky-700">${data.author} : </span>${data.comment}</div>`);
+        });
+    }
+
+    function myOnClick() {
+        console.log($('#comment').val())
+        socket.emit("msg", {comment: $('#comment').val(), author: author});
+        $('#comment').val('');
+    }
+</script>
 </html>
