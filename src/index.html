@@ -97,6 +97,7 @@
     let socket
 
     let author = "사용자"
+    let connectIp = "127.0.0.1:4500"
 
     const authorBtn = document.getElementById('nicknameBtn')
 
@@ -148,13 +149,14 @@
 
     ipcRenderer.on('ip', (event, arg) => {
         // author = arg
+        connectIp = arg
         $('#port').html(arg)
     })
 
     function connectBtn() {
-        socket = io('http://127.0.0.1:4500')
-
         ipcRenderer.send('connect', '')
+
+        socket = io(`http://${connectIp}`)
 
         $('#chat').html('')
 
