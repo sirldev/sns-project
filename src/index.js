@@ -117,9 +117,15 @@ ipcMain.on("serveBtnClick", (event, args) => {
     io.on('connection', (socket) => {
         console.log('a user connected');
         const instanceId = socket.id;
-        socket.on('msg', function (data) {
+
+        socket.on('joinRoom', function (data) {
             console.log(data);
-            socket.emit('recMsg', {comment: data.comment + '\n', author: data.author});
+            socket.join("1234");
+        });
+
+        socket.on('reqMsg', function (data) {
+            console.log(data);
+            socket.in("1234").emit('recMsg', {comment: data.comment + '\n', author: data.author});
         })
     });
 

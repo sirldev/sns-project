@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8"/>
-    <title>Hello World!</title>
+    <title>Chat Server</title>
     <link rel="stylesheet" href="index.css"/>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
@@ -61,6 +61,10 @@
                 <button id="portBtn"
                         class="bg-sky-500 hover:bg-sky-700 px-5 py-2 text-sm leading-5 rounded-full font-semibold text-white">
                     접속 포트 설정
+                </button>
+                <button id="roomBtn"
+                        class="bg-sky-500 hover:bg-sky-700 px-5 py-2 text-sm leading-5 rounded-full font-semibold text-white">
+                    방 이름 설정
                 </button>
                 <button id="serveBtn"
                         class="bg-sky-500 hover:bg-sky-700 px-5 py-2 text-sm leading-5 rounded-full font-semibold text-white">
@@ -160,15 +164,18 @@
 
         $('#chat').html('')
 
+        socket.emit('joinRoom', {roomName: '1234'});
+
         socket.on('recMsg', function (data) {
-            console.log(data.comment)
+            console.log(data)
             $('#chat').append(`<div><span class="text-sky-700">${data.author} : </span>${data.comment}</div>`);
         });
     }
 
     function myOnClick() {
-        console.log($('#comment').val())
-        socket.emit("msg", {comment: $('#comment').val(), author: author});
+        // console.log($('#comment').val())
+        $('#chat').append(`<div><span class="text-red-700">${author} : </span>${$('#comment').val()}</div>`)
+        socket.emit("reqMsg", {comment: $('#comment').val(), author: author, roomName: '1234'});
         $('#comment').val('');
     }
 </script>
