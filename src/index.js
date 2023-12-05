@@ -15,9 +15,7 @@ if (require('electron-squirrel-startup')) {
 const createWindow = () => {
     // Create the browser window.
     const mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
-        webPreferences: {
+        width: 800, height: 600, webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             nodeIntegration: true,
             contextIsolation: false,
@@ -66,13 +64,9 @@ let author = "사용자"
 ipcMain.on("ipBtnClick", (event, args) => {
     console.log(args)
     prompt({
-        title: 'IP Input',
-        label: 'IP:',
-        value: connectIp,
-        inputAttrs: {
+        title: 'IP Input', label: 'IP:', value: connectIp, inputAttrs: {
             type: 'text'
-        },
-        type: 'input'
+        }, type: 'input'
     })
         .then((r) => {
             if (r === null) {
@@ -88,13 +82,9 @@ ipcMain.on("ipBtnClick", (event, args) => {
 ipcMain.on("connectPortBtn", (event, args) => {
     console.log(args)
     prompt({
-        title: 'Port Input',
-        label: 'Port:',
-        value: connectPort,
-        inputAttrs: {
+        title: 'Port Input', label: 'Port:', value: connectPort, inputAttrs: {
             type: 'number'
-        },
-        type: 'input'
+        }, type: 'input'
     })
         .then((r) => {
             if (r === null) {
@@ -127,6 +117,15 @@ ipcMain.on("serveBtnClick", (event, args) => {
             console.log(data);
             socket.in("1234").emit('recMsg', {comment: data.comment + '\n', author: data.author});
         })
+
+        socket.on('reqPosition', function (data) {
+            console.log('oo', data.position);
+            socket.in("1234").emit("recPosition", {position: data.position})
+        })
+
+        socket.on('reqClear', function () {
+            socket.in("1234").emit("recClear", {})
+        })
     });
 
     server.listen(servePort, () => {
@@ -138,13 +137,9 @@ ipcMain.on("serveBtnClick", (event, args) => {
 
 ipcMain.on("authorBtnClick", (event, args) => {
     prompt({
-        title: 'Author Input',
-        label: 'Author:',
-        value: author,
-        inputAttrs: {
+        title: 'Author Input', label: 'Author:', value: author, inputAttrs: {
             type: 'text'
-        },
-        type: 'input'
+        }, type: 'input'
     })
         .then((r) => {
             if (r === null) {
@@ -158,13 +153,9 @@ ipcMain.on("authorBtnClick", (event, args) => {
 
 ipcMain.on("portBtn", (event, args) => {
     prompt({
-        title: 'Port Input',
-        label: 'Port:',
-        value: servePort,
-        inputAttrs: {
+        title: 'Port Input', label: 'Port:', value: servePort, inputAttrs: {
             type: 'number'
-        },
-        type: 'input'
+        }, type: 'input'
     })
         .then((r) => {
             if (r === null) {

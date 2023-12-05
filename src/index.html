@@ -74,7 +74,7 @@
         </div>
     </div>
     <div class="flex flex-col w-[400px] h-[600px] border-l border-gray-300">
-        <div class="flex-1 flex flex-col overflow-y-scroll">
+        <div class="relative flex-1 flex flex-col overflow-y-scroll">
             <div class="flex items-center justify-between w-full px-2 py-1 bg-[#2A2A2A]">
                 <div class="text-white" id="author">&nbsp;</div>
                 <div class="text-sky-700" id="port">&nbsp;</div>
@@ -82,8 +82,19 @@
             <div class="flex-1" id="chat">
 
             </div>
+            <div class="absolute bottom-0 left-0 right-0 h-[416px] bg-black p-4 pt-0 hidden" id="canvas_section">
+                <div class="flex items-center justify-between text-white py-0.5 text-xs leading-4 font-bold ">
+                    <div class="" onclick="clearCanvas()">초기화</div>
+                    <div class="" onclick="closeCanvas()">X</div>
+                </div>
+                <canvas class="w-[368px] h-[368px] bg-white" id="canvas"></canvas>
+            </div>
         </div>
         <div class="flex items-center justify-between w-[400px] py-2 bg-black px-2">
+            <button class="bg-sky-500 hover:bg-sky-700 px-3 py-1 text-xs rounded-lg font-semibold text-white mr-2"
+                    onclick="toggleCanvas()">
+                이미지
+            </button>
             <input class="flex-1 px-2 mr-2" id="comment"/>
             <button class="bg-sky-500 hover:bg-sky-700 px-3 py-1 text-xs rounded-lg font-semibold text-white"
                     onclick="myOnClick()">
@@ -157,6 +168,37 @@
         $('#port').html(arg)
     })
 
+
+    function myOnClick() {
+        // console.log($('#comment').val())
+        $('#chat').append(`<div><span class="text-red-700">${author} : </span>${$('#comment').val()}</div>`)
+        socket.emit("reqMsg", {comment: $('#comment').val(), author: author, roomName: '1234'});
+        $('#comment').val('');
+    }
+
+    let position = {x: 0, y: 0}
+
+    window.addEventListener('resize', resize);
+    document.addEventListener('mousemove', draw);
+    document.addEventListener('mousedown', setPosition);
+    document.addEventListener('mouseenter', setPosition);
+
+    const canvas = document.getElementById("canvas")
+    const ctx = canvas.getContext("2d")
+
+    function setPosition(e) {
+        console.log(e.clientX)
+        console.log(e.clientY)
+        if (e.clientX >= 416 && e.clientX <= 784) {
+            if (e.clientY >= 176 && e.clientY <= 524) {
+                position.x = e.clientX - 416;
+                position.y = e.clientY - 176;
+                socket.emit("reqPosition", {position: {x: e.clientX - 416, y: e.clientY - 176}});
+                // console.log({x: e.clientX - 416, y: e.clientY - 176})
+            }
+        }
+    }
+
     function connectBtn() {
         ipcRenderer.send('connect', '')
 
@@ -170,13 +212,100 @@
             console.log(data)
             $('#chat').append(`<div><span class="text-sky-700">${data.author} : </span>${data.comment}</div>`);
         });
+
+        socket.on('recPosition', function (data) {
+            console.log(data)
+            ctx.beginPath(); // begin
+
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000000';
+
+            ctx.moveTo(data.position.x, data.position.y); // from
+            // setPosition(e);
+            ctx.lineTo(data.position.x, data.position.y); // to
+
+            ctx.stroke()
+        })
+
+        socket.on('recClear', function (data) {
+            clearCanvas()
+        })
     }
 
-    function myOnClick() {
-        // console.log($('#comment').val())
-        $('#chat').append(`<div><span class="text-red-700">${author} : </span>${$('#comment').val()}</div>`)
-        socket.emit("reqMsg", {comment: $('#comment').val(), author: author, roomName: '1234'});
-        $('#comment').val('');
+    // resize canvas
+    function resize() {
+        ctx.canvas.width = 368;
+        ctx.canvas.height = 368;
     }
+
+    function draw(e) {
+        // mouse left button must be pressed
+        if (e.buttons !== 1) return;
+        ctx.beginPath(); // begin
+
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#000000';
+
+        ctx.moveTo(position.x, position.y); // from
+        setPosition(e);
+        ctx.lineTo(position.x, position.y); // to
+
+        ctx.stroke(); // draw it!
+    }
+
+    function toggleCanvas() {
+        const canvasElement = document.getElementById('canvas_section')
+        console.log(11, canvasElement.style.display)
+        if (canvasElement.style.display === '' || canvasElement.style.display === 'none') {
+            canvasElement.style.display = 'block'
+        } else {
+            canvasElement.style.display = 'none'
+        }
+    }
+
+    function closeCanvas() {
+        const canvasElement = document.getElementById('canvas_section')
+        canvasElement.style.display = 'none'
+    }
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, 368, 368)
+        ctx.beginPath()
+        socket.emit("reqClear", {});
+    }
+
+
+    // function beginPath(x, y, size) {
+    //     const canvas = document.getElementById("canvas");
+    //     if (canvas.getContext) {
+    //         const ctx = canvas.getContext("2d");
+    //
+    //         ctx.beginPath();
+    //         ctx.moveTo(x, y);
+    //         ctx.lineWidth = size;
+    //     }
+    // }
+    //
+    // function strokePath(x, y, color) {
+    //     const canvas = document.getElementById("canvas");
+    //     if (canvas.getContext) {
+    //         const ctx = canvas.getContext("2d");
+    //
+    //         let currentColor = ctx.strokeStyle;
+    //         if (color !== null) currentColor = color;
+    //         ctx.strokeStyle = currentColor;
+    //
+    //         ctx.lineTo(x, y);
+    //         ctx.stroke();
+    //     }
+    // }
+    //
+    // $(function () {
+    //     $('#canvas').on('d')
+    // })
+
+
 </script>
 </html>
